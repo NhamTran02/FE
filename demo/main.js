@@ -20,8 +20,21 @@ function addTask(){
         return;
     }
 
+    const tasks=todoList.querySelectorAll(".todo-app__display");
+    let isDuplicate = false;
+    tasks.forEach(task =>{
+        if(task.textContent.trim() == value){
+            isDuplicate=true
+        }
+    });
+    if(isDuplicate){
+        validation.innerText = "Task này đã tồn tại!";
+    return;
+    }
+
     const div=document.createElement("div");
     div.className="todo-app__item";
+    div.draggable=true;
     todoList.appendChild(div);
 
     const task= document.createElement("p");
@@ -41,10 +54,64 @@ function addTask(){
     todoContext();
 
     input.value="";
+
+    div.addEventListener("dragstart", dragStart);
+    div.addEventListener("dragover",dragOver);
+    div.addEventListener("drop",drop);
+
 }
+
+function searchTask() {
+    const keyword = document.getElementById("search-input").value;
+    const items = document.querySelectorAll(".todo-app__item");
+  
+    items.forEach(item => {
+      const text = item.querySelector(".todo-app__display").textContent;
+      if (text.includes(keyword)) {
+        item.style.display = "flex"; 
+      } else {
+        item.style.display = "none";
+      }
+    });
+}
+
 
 function clearAll(){
     todoList.innerText="";
     count=0;
     todoInfo.innerText="Bạn có 0 công việc cần xử lý";
+}
+
+let draggedItem = null;
+
+function dragStart(){
+    draggedItem=this;
+}
+
+function dragOver(e){
+    e.preventDefault();
+    if (this != draggedItem) {
+        // Hoán đổi vị trí giữa draggedItem và this
+        let draggedNext = draggedItem.nextSibling;
+        let targetNext = this.nextSibling;
+
+        let parent = this.parentNode;
+
+        // draggedItem đứng trước this
+        if (draggedNext == this) {
+            parent.insertBefore(this, draggedItem);
+        }
+        // this đứng trước draggedItem
+        else if (targetNext == draggedItem) {
+            parent.insertBefore(draggedItem, this);
+        } else {
+            parent.insertBefore(draggedItem, targetNext);
+            parent.insertBefore(this, draggedNext);
+        }
+    }
+}
+
+function drop(e){
+    e.preventDefault();
+    draggedItem = null;
 }
